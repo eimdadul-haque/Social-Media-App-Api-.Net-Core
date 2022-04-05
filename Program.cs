@@ -11,6 +11,8 @@ using Social_Media_App_Api_.Net_Core.Hubs;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Add services to the container.
+
 builder.Services.AddControllers();
 builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnectioString")));
 builder.Services.AddIdentity<AppUsers, IdentityRole>()
@@ -45,7 +47,6 @@ builder.Services.AddAuthentication(option =>
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("0123456789123456"))
     };
 });
-builder.Services.AddSignalR();
 
 builder.Services.AddCors(options =>
 {
@@ -59,7 +60,10 @@ builder.Services.AddCors(options =>
 });
 
 
+builder.Services.AddSignalR();
+
 var app = builder.Build();
+app.UseCors();
 
 app.UseStaticFiles( new StaticFileOptions
 {
@@ -68,9 +72,11 @@ app.UseStaticFiles( new StaticFileOptions
 });
 
 app.UseRouting();
-app.UseCors();
 app.UseAuthentication();
 app.UseAuthorization();
-
+app.UseEndpoints(endpoints =>
+{
+    endpoints.MapHub<Chat>("/chat");
+});
 app.MapControllers();
 app.Run();

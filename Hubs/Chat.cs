@@ -15,6 +15,11 @@ namespace Social_Media_App_Api_.Net_Core.Hubs
             await Clients.Client(connectionId).SendAsync(message);
         }
 
+        public async Task sendMessageToCaller(string message)
+        {
+            await Clients.Caller.SendAsync(message);
+        }
+
         public override async Task OnConnectedAsync()
         {
             await Clients.All.SendAsync("Connecteduser", Context.ConnectionId);

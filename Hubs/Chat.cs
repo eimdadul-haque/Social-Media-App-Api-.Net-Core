@@ -7,26 +7,24 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace Social_Media_App_Api_.Net_Core.Hubs
 {
+    
     public class Chat : Hub
     {
-        //[Authorize]
-
-        public async Task SendMessage(string msg)
+        public async Task sendMessageToUser(string connectionId,string message)
         {
-            await Clients.All.SendAsync("chat", msg);
+            await Clients.Client(connectionId).SendAsync(message);
         }
 
-        public async Task user(string userName)
+        public override async Task OnConnectedAsync()
         {
-            await Clients.All.SendAsync("chat", userName);
+            await Clients.All.SendAsync("Connecteduser", Context.ConnectionId);
+            await base.OnConnectedAsync();
         }
 
-        //[Authorize]
-
-        public override Task OnConnectedAsync()
+        public override async Task OnDisconnectedAsync(Exception? exception)
         {
-           // ActiveUser.active_use.Add(Context.ConnectionId, User.identity.name);
-            return base.OnConnectedAsync();
+            await Clients.All.SendAsync("DisConnecteduser", Context.ConnectionId);
+            await base.OnDisconnectedAsync(exception);
         }
     }
 }

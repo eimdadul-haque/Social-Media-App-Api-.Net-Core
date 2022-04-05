@@ -14,12 +14,10 @@ namespace Social_Media_App_Api_.Net_Core.Controllers
     {
         private ApplicationDbContext _db;
         private UserManager<AppUsers> _userManager;
-        private IHub<Chat> _hubContext;
-        public MessageController(ApplicationDbContext db, UserManager<AppUsers> userManager, IHubContext<Chat> hubContext)
+        public MessageController(ApplicationDbContext db, UserManager<AppUsers> userManager)
         {
             _db = db;
             _userManager = userManager;
-            _hubContext = hubContext;
         }
 
         [HttpPost]
@@ -27,7 +25,6 @@ namespace Social_Media_App_Api_.Net_Core.Controllers
         {
             var user = await _userManager.GetUserAsync(User);
             message.sender = user.UserName;
-            _hubContext.Clients.User
             return Ok();
         }
     }

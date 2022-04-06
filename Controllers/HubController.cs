@@ -2,19 +2,22 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using Social_Media_App_Api_.Net_Core.Data;
 using Social_Media_App_Api_.Net_Core.Hubs;
 using Social_Media_App_Api_.Net_Core.Models;
+using Social_Media_App_Api_.Net_Core.Services;
 
 namespace Social_Media_App_Api_.Net_Core.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class MessageController : ControllerBase
+    public class HubController : ControllerBase
     {
         private ApplicationDbContext _db;
         private UserManager<AppUsers> _userManager;
-        public MessageController(ApplicationDbContext db, UserManager<AppUsers> userManager)
+        public HubController(ApplicationDbContext db, UserManager<AppUsers> userManager)
         {
             _db = db;
             _userManager = userManager;
@@ -26,6 +29,12 @@ namespace Social_Media_App_Api_.Net_Core.Controllers
             var user = await _userManager.GetUserAsync(User);
             message.sender = user.UserName;
             return Ok();
+        }
+
+        [HttpGet("getActiveUserList")]
+        public async Task<IActionResult> getActiveUserList()
+        {
+            return Ok(ConnectedUser.Ids);
         }
     }
 }

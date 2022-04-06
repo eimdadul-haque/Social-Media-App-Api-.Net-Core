@@ -46,6 +46,24 @@ builder.Services.AddAuthentication(option =>
         ValidIssuer = "0",
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("0123456789123456"))
     };
+
+    option.Events = new JwtBearerEvents
+    {
+        OnMessageReceived = context =>
+        {
+            var accessToken = context.Request.Query["access_token"];
+
+            // If the request is for our hub...
+            var path = context.HttpContext.Request.Path;
+            if (!string.IsNullOrEmpty(accessToken) &&
+                (path.StartsWithSegments("/chat")))
+            {
+                // Read the token out of the query string
+                context.Token = accessToken;
+            }
+            return Task.CompletedTask;
+        }
+    };
 });
 
 builder.Services.AddCors(options =>
@@ -76,7 +94,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 app.UseEndpoints(endpoints =>
 {
-    endpoints.MapHub<Chat>("/chat");
+    endpoints.MapHub<ChatHub>("/chat");
 });
 app.MapControllers();
 app.Run();

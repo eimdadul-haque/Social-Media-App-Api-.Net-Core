@@ -7,9 +7,16 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace Social_Media_App_Api_.Net_Core.Hubs
 {
-    
-    public class Chat : Hub
+
+    [Authorize]
+    public class ChatHub : Hub
     {
+        private readonly IHttpContextAccessor _context;
+
+        public ChatHub(IHttpContextAccessor context)
+        {
+            _context = context;
+        }
         public async Task sendMessageToUser(string connectionId,string message)
         {
             await Clients.Client(connectionId).SendAsync(message);
@@ -22,13 +29,16 @@ namespace Social_Media_App_Api_.Net_Core.Hubs
 
         public override async Task OnConnectedAsync()
         {
-            await Clients.All.SendAsync("Connecteduser", Context.ConnectionId);
+            await Clients.All.SendAsync("Active", Context.ConnectionId, Context.User.Identity.Name);
             await base.OnConnectedAsync();
         }
 
         public override async Task OnDisconnectedAsync(Exception? exception)
         {
-            await Clients.All.SendAsync("DisConnecteduser", Context.ConnectionId);
+            var item = ConnectedUser.Ids.SingleOrDefault(x => x.Id == Context.ConnectionId);
+            if (item != null)
+                ConnectedUser.Ids.Remove(item);
+
             await base.OnDisconnectedAsync(exception);
         }
     }

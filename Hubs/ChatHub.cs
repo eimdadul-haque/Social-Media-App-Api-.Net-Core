@@ -17,28 +17,26 @@ namespace Social_Media_App_Api_.Net_Core.Hubs
         {
             _context = context;
         }
-        public async Task sendMessageToUser(string connectionId,string message)
+        public async Task sendMessageToUser(string connectionId, string userName, string message)
         {
-            await Clients.Client(connectionId).SendAsync(message);
+            await Clients.Client(connectionId).SendAsync("ToId", userName, message);
         }
 
-        public async Task sendMessageToCaller(string message)
+        public async Task sendMessageToCaller(string userName, string message)
         {
-            await Clients.Caller.SendAsync(message);
+            await Clients.Caller.SendAsync("ToCaller", userName, message);
         }
+
 
         public override async Task OnConnectedAsync()
         {
-            await Clients.All.SendAsync("Active", Context.ConnectionId, Context.User.Identity.Name);
+            await Clients.All.SendAsync("Active", Context.ConnectionId, Context.User?.Identity?.Name);
             await base.OnConnectedAsync();
         }
 
         public override async Task OnDisconnectedAsync(Exception? exception)
         {
-            var item = ConnectedUser.Ids.SingleOrDefault(x => x.Id == Context.ConnectionId);
-            if (item != null)
-                ConnectedUser.Ids.Remove(item);
-
+            await Clients.All.SendAsync("InActive", Context.ConnectionId, Context.User?.Identity?.Name);
             await base.OnDisconnectedAsync(exception);
         }
     }
